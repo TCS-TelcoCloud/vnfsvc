@@ -43,21 +43,3 @@ vnfsvc
 * Run with the following command to start the server::
 
     $ python /usr/bin/vnfsvc-server  --config-file /etc/vnfsvc/vnfsvc.conf --log-file /var/log/vnfsvc/server.log 
-
-vnfManager
------------
-
-Interfaces with VNFs and vnfsvc for configuration and lifecycle management of virtual network functions
-In the current setup init is the only supported lifecycle event
-
-* Sample descriptors and howTo are provided in vnfsvc_examples folder. It has::
-
-    $ HA Proxy image 
-    $ Webserver image
-    $ NSD 
-    $ VNFD
-    $ HEAT template
-    $ README for running the installation
-
-* After installing vnfsvc, python-vnfsvcclient and HEAT updates, run the setup as detailed in vnfsvc_examples
-
