@@ -1,0 +1,63 @@
+=======
+VNFSVC
+=======
+
+OpenVNFManager enables NFV service orchestration on openstack platform
+
+* It has 2 key components::
+
+    $ vnfsvc 
+    $ vnfManager
+
+vnfsvc
+-------
+
+* Runs as a service [ similar to openstack neutron etc ] on the controller node
+  It implements server side for vnfsvcclient and HEAT
+
+  To install::
+
+    $ git clone https://github.com/TCS-TelcoCloud/OpenVNFManager.git
+    $ python setup.py install_lib install_egg_info
+
+* Check::
+
+    $ api-paste.ini,  rootwrap.conf,  rootwrap.d,  templates.json,  vnfsvc.conf exists in /etc/vnfsvc/ [ on RedHat Linux/Centos7/Fedora ]
+    $ passwords and urls of the openstack services in /etc/vnfsvc/vnfsvc.conf
+
+* Create keystone endpoints::
+
+    $ keystone service-create --name vnfsvc --type vnfservice --description "VNF service"
+    $ keystone endpoint-create --region RegionOne --service-id <vnfsvc_service_id> --publicurl "http://<your_ip>:9010" --internalurl "http://<your_ip>:9010" --adminurl "http://<your_ip>:9010"
+    $ keystone user-create --tenant-id <service_tenant_id> --name vnfsvc --pass <passsword>
+    $ keystone user-role-add --user-id <vnfsvc_user_id> --tenant-id <service_tenant_id> --role-id <admin_role_id>
+  
+* Execute the following commands for database configuration::
+
+    $ create database vnfsvc; (MYSQL)
+    $ grant all privileges on vnfsvc.* to 'vnfsvc'@'localhost' identified by <database password>; (MYSQL)
+    $ grant all privileges on vnfsvc.* to 'vnfsvc'@'%' identified by <database password>; (MYSQL)
+    $ vnfsvc-db-manage --config-file /etc/vnfsvc/vnfsvc.conf upgrade head
+    $ mkdir /var/log/vnfsvc
+
+* Run with the following command to start the server::
+
+    $ python /usr/bin/vnfsvc-server  --config-file /etc/vnfsvc/vnfsvc.conf --log-file /var/log/vnfsvc/server.log 
+
+vnfManager
+-----------
+
+Interfaces with VNFs and vnfsvc for configuration and lifecycle management of virtual network functions
+In the current setup init is the only supported lifecycle event
+
+* Sample descriptors and howTo are provided in vnfsvc_examples folder. It has::
+
+    $ HA Proxy image 
+    $ Webserver image
+    $ NSD 
+    $ VNFD
+    $ HEAT template
+    $ README for running the installation
+
+* After installing vnfsvc, python-vnfsvcclient and HEAT updates, run the setup as detailed in vnfsvc_examples
+
