@@ -279,8 +279,8 @@ class VNFPlugin(vnf_db.NetworkServicePluginDb):
     def _delete_vtap_and_vnfm(self, service_db_dict):
         try:
             vnfm_id = service_db_dict['service_db'][0].vnfm_id
-            homedir = cfg.CONF.vnf.compute_home_user
-            with open(homedir+vnfm_id+"/ovs.sh","r") as f:
+            homedir = self.conf.state_path
+            with open(homedir+"/"+vnfm_id+"/ovs.sh","r") as f:
                 data = f.readlines()
             subprocess.call(["sudo","ovs-vsctl","del-port",data[2].split(" ")[2]])
             subprocess.call(["sudo","pkill","-9","vnf-manager"])
