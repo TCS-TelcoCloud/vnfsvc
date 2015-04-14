@@ -46,7 +46,6 @@ class Configuration(object):
         self.neutronclient = client.NeutronClient()
 
     def preconfigure(self):
-        import pdb;pdb.set_trace()
         for key in self.nsd['preconfigure']:
             method_key = key.replace('-','_')
             getattr(self, method_key)(self.nsd['preconfigure'][key])
