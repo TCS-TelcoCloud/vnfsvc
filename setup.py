@@ -27,4 +27,22 @@ except ImportError:
     pass
 
 setuptools.setup(name = "vnfsvc", version="2015.1.0",
-                 packages=find_packages())
+                 packages=find_packages(),
+                 include_package_data=True,
+                 entry_points={
+                     'console_scripts': [
+                         'vnfsvc-server=vnfsvc.server:main',
+                         'vnfsvc-db-manage=vnfsvc.db.migration.cli:main'
+                     ]
+                 },
+                 data_files=[
+                     ('/etc/vnfsvc/', [
+                         'etc/vnfsvc.conf',
+                         'etc/templates.json',
+                         'etc/api-paste.ini',
+                         'etc/rootwrap.conf'
+                       ]
+                     ),
+                     ('/etc/vnfsvc/rootwrap.d', ['etc/rootwrap.d/debug.filters'])
+                 ]
+)
