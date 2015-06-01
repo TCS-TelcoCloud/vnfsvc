@@ -44,7 +44,6 @@ from vnfsvc import nsdmanager
 from vnfsvc.api.v2 import attributes
 from vnfsvc.api.v2 import vnf
 from vnfsvc.db.vnf import vnf_db
-from vnfsvc import vnffg
 
 from vnfsvc.openstack.common.gettextutils import _
 from vnfsvc.openstack.common import excutils
@@ -237,12 +236,6 @@ class VNFPlugin(vnf_db.NetworkServicePluginDb):
 
             #Launch VNFDs
             self._create_vnfds(context,nsd_id)
-
-            #TODO : (tcs) Need to enhance computation of forwarding graph
-            vnffg.ForwardingGraph(self.ns_dict[nsd_id]['nsd_template'],
-                               self.ns_dict[nsd_id]['vnfds']
-                                 ).configure_forwarding_graph()
-
             self.update_nsd_status(context, nsd_id, 'ACTIVE')
         except Exception as e:
             print 'AN EXCEPTION HAS OCCURED'
@@ -433,6 +426,7 @@ class VNFPlugin(vnf_db.NetworkServicePluginDb):
         while not acknowledged:
             vdu_count = 0
             for vdu in vdus:
+                LOG.debug(_('Wait for acknowledgement for vdu : %s'), vdu)
                 if vdu in self.ns_dict[nsd_id]['created']:
                     vdu_count = vdu_count + 1
             if vdu_count == len(vdus):
@@ -707,7 +701,7 @@ class VNFPlugin(vnf_db.NetworkServicePluginDb):
                         instances_list.remove(inst)
                         instance.append(inst)
                     elif temp_instance.status == 'ERROR':
-                        self.update_nsd_status(nsd_id, 'ERROR')
+                        self.update_nsd_status(context, nsd_id, 'ERROR')
                         raise exceptions.InstanceException()
                     else:
                         time.sleep(3)
@@ -894,10 +888,10 @@ class VNFPlugin(vnf_db.NetworkServicePluginDb):
         return self.ns_dict[nsd_id]['vnfm_dir']+'/ovs.sh',str(p_id)
 
 
-    def build_acknowledge_list(self, vnfd_name, vdu_name, instance, status, nsd_id):
+    def build_acknowledge_list(self, context, vnfd_name, vdu_name, instance, status, nsd_id):
         vdu = vnfd_name+':'+vdu_name
         if status == 'ERROR':
-            self.update_nsd_status(nsd_id, 'ERROR')
+            self.update_nsd_status(context, nsd_id, 'ERROR')
             raise exceptions.ConfigurationError
         else:
             #check whether the key exists or not
@@ -943,12 +937,12 @@ class VNFManagerCallbacks(v_rpc.RpcCallback):
 
     def send_ack(self, context, vnfd, vdu, instance, status, nsd_id):
         if status == 'COMPLETE':
-            self.plugin.build_acknowledge_list(vnfd, vdu, instance,
+            self.plugin.build_acknowledge_list(context, vnfd, vdu, instance,
                                                status, nsd_id)
             LOG.debug(_('ACK received from VNFManager: '
                         'Configuration complete for VNF %s'), instance)
         else:
-            self.plugin.build_acknowledge_list(vnfd, vdu, instance,
+            self.plugin.build_acknowledge_list(context,vnfd, vdu, instance,
                                                status, nsd_id)
             LOG.debug(_('ACK received from VNFManager: '
                         'Confguration failed for VNF %s'), instance)
