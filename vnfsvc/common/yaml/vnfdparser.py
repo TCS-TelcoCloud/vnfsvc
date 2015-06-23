@@ -141,8 +141,8 @@ class VNFParser(object):
     def connection_point(self, data):
         self.new_vnfd['connection_point'] = data
 
-    def monitoring_parameter(self, data):
-	    self.new_vnfd['postconfigure']['monitoring_parameter'] = data
+    def monitoring(self, data):
+	    self.new_vnfd['postconfigure']['monitoring'] = data
 
     def vdus(self, data):
         for vdu in data.keys():

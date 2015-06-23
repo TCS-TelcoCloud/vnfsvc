@@ -63,8 +63,8 @@ class NetworkParser(object):
         self.new_nsd['mgmt-cidr'] = mgmt_subnet['subnet']['cidr']
         return self.new_nsd
 
-    def monitoring_parameter(self, data):
-        self.new_nsd['postconfigure']['monitoring_parameter'] = data
+    def monitoring(self, data):
+        self.new_nsd['postconfigure']['monitoring'] = data
 
     def endpoints(self, data):
         self.new_nsd['postconfigure']['endpoints'] = data
